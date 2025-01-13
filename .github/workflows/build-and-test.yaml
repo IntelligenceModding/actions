@@ -3,10 +3,24 @@ run-name: Build and test the changes
 on:
   workflow_call:
     inputs:
-      ref:
+      pr:
         required: false
         type: string
-        
+      build_name:
+        required: false
+        type: string
+        default: Artifact
+
+permissions:
+  actions: write
+  attestations: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: build-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
@@ -14,13 +28,12 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
         run: ./gradlew check
   build:
+    if: ${{ github.event.inputs.pr != '' }}
     name: Build
     runs-on: self-hosted
     needs: test
@@ -28,6 +41,21 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
+      - name: LOG-METADATA-1
+        run: |
+          echo "output:PR_NUMBER=${{ github.event.inputs.pr }}"
+          echo "output:HEAD_SHA=${{ github.sha }}"
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build "-Dmod_artifact_suffix=-pr${{ github.event.inputs.pr }}-$(git rev-parse --short ${{ github.sha }})"
+      - name: Upload Build Artifacts
+        id: artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ format('{0} PR {1}', github.event.inputs.build_name, github.event.inputs.pr) }}
+          path: build/libs
+          overwrite: true
+          if-no-files-found: error
+      - name: LOG-METADATA-2
+        run: |
+          echo "output:ARTIFACT_URL=${{ steps.artifact.outputs.artifact-url }}"
