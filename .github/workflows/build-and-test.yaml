@@ -3,13 +3,17 @@ run-name: Build and test the changes
 on:
   workflow_call:
     inputs:
-      pr:
+      build:
         required: false
-        type: string
+        type: boolean
+        default: false
       build_name:
         required: false
         type: string
         default: Artifact
+      pr:
+        required: false
+        type: string
 
 permissions:
   actions: write
@@ -33,7 +37,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew check
   build:
-    if: ${{ github.event.inputs.pr != '' }}
+    if: ${{ github.event.inputs.build }}
     name: Build
     runs-on: self-hosted
     needs: test
@@ -47,7 +51,7 @@ jobs:
           echo "output:PR_NUMBER=${{ github.event.inputs.pr }}"
           echo "output:HEAD_SHA=${{ github.sha }}"
       - name: Build with Gradle
-        run: ./gradlew build "-Dmod_artifact_suffix=-pr${{ github.event.inputs.pr }}-$(git rev-parse --short ${{ github.sha }})"
+        run: ./gradlew build "-Dmod_artifact_suffix=${{ github.event.inputs.pr && format('-pr{0}', github.event.inputs.pr) || '' }}-$(git rev-parse --short ${{ github.sha }})"
       - name: Upload Build Artifacts
         id: artifact
         uses: actions/upload-artifact@v4
