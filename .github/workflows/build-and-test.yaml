@@ -51,7 +51,7 @@ jobs:
           function output() {
             echo "output:$1=$2"
           }
-          output PR_NUMBER "${{ github.event.inputs.pr }}"
+          output PR_NUMBER "${{ inputs.pr }}"
           output HEAD_SHA "${{ github.sha }}"
       - name: Build with Gradle
         run: ./gradlew build --daemon "-Dmod_artifact_suffix=${{ inputs.pr && format('-pr{0}', inputs.pr) || '' }}-$(git rev-parse --short ${{ github.sha }})"
