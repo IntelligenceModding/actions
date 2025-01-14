@@ -14,8 +14,12 @@ on:
         type: boolean
         default: true
     outputs:
-      artifact-id: ${{ jobs.build.outputs.artifact-id }}
-      artifact-name: ${{ jobs.build.outputs.artifact-name }}
+      artifact-id:
+        description: "artifact-id"
+        value: ${{ jobs.build.outputs.artifact-id }}
+      artifact-name:
+        description: "build_name"
+        value: ${{ jobs.build.outputs.artifact-name }}
 
 permissions:
   actions: write
