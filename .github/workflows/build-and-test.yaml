@@ -1,5 +1,5 @@
 name: build-and-test
-run-name: Build and test the changes and publish and whatever
+run-name: Build and test the changes
 on:
   workflow_call:
     inputs:
