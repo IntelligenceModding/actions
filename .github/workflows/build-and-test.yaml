@@ -38,7 +38,7 @@ concurrency:
 jobs:
   build:
     name: Build
-    runs-on: self-hosted
+    runs-on: [self-hosted, net-ipv6, setup-ipv6]
     outputs:
       artifact-id: ${{ steps.artifact.outputs.artifact-id }}
       artifact-name: ${{ inputs.build_name }}
@@ -81,7 +81,7 @@ jobs:
   check:
     if: ${{ inputs.check }}
     name: Check
-    runs-on: self-hosted
+    runs-on: [self-hosted, net-ipv6, setup-ipv6]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
