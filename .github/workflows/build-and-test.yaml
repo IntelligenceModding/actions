@@ -9,6 +9,12 @@ on:
       pr:
         required: false
         type: string
+      pr_ref:
+        required: false
+        type: string
+      pr_repo:
+        required: false
+        type: string
       check:
         required: false
         type: boolean
@@ -50,8 +56,11 @@ jobs:
           }
           output PR_NUMBER "${{ inputs.pr }}"
           output HEAD_SHA "${{ github.sha }}"
-      - name: Checkout sources
+      - name: Checkout Sources
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.pr_ref }}
+          repository: ${{ inputs.pr_repo }}
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
